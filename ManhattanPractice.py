@@ -109,7 +109,7 @@ class enemy():
     walkRight2 = [pygame.image.load('Game/R1.png'), pygame.image.load('Game/R2.png'), pygame.image.load('Game/R3.png'), pygame.image.load('Game/R4.png'), pygame.image.load('Game/R5.png'), pygame.image.load('Game/R6.png'), pygame.image.load('Game/R7.png'), pygame.image.load('Game/R8.png'), pygame.image.load('Game/R9.png') ]
     walkLeft2 = [pygame.image.load('Game/L1.png'), pygame.image.load('Game/L2.png'), pygame.image.load('Game/L3.png'), pygame.image.load('Game/L4.png'), pygame.image.load('Game/L5.png'), pygame.image.load('Game/L6.png'), pygame.image.load('Game/L7.png'), pygame.image.load('Game/L8.png'), pygame.image.load('Game/L9.png')]
 
-    def __init__(self, x, y, width, height, end):
+    def __init__(self, x, y, width, height, end, vel, health, maxHP):
         self.visible = True
         if self.visible:
             self.x = x
@@ -118,14 +118,14 @@ class enemy():
             self.height = height
             self.end = end
             self.walkCount = 0
-            self.vel = 3
-            self.bossVel = 6
+            self.vel = vel
             self.path = [self.x, self.end] # path = x -----> END 
             self.hitbox = (self.x + 13, self.y + 2, 31, 57)
             self.score = 0
-            self.health = 10 #Remove health bar and enemy when the it is dead
-            self.bossHP = 20
+            self.health = health #Remove health bar and enemy when the it is dead
+            self.maxHP = maxHP
             
+            #나중에 parameter로 hp랑 vel은 집어넣기
     def draw(self, screen):
         self.move()
         if self.visible:
@@ -139,7 +139,7 @@ class enemy():
                 self.walkCount += 1
             self.hitbox = (self.x + 13, self.y + 2, 31, 57) #draw hitbox 
             pygame.draw.rect(screen, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10)) #Red is background color
-            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/10)*(10 - self.health)), 10))
+            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/self.maxHP)*(self.maxHP - self.health)), 10))
             #pygame.draw.rect(screen, (255,255,255), self.hitbox, 2) self.move()
     
     def draw2(self, screen):
@@ -147,15 +147,15 @@ class enemy():
         if self.visible:
             if self.walkCount + 1 >= 27: #33프레임이 넘어가면  -> 사진이 끝까지 왔다는 뜻 
                 self.walkCount = 0
-            if self.bossVel > 0: #오른쪽으로 갈때,
+            if self.vel > 0: #오른쪽으로 갈때,
                 screen.blit(self.walkRight2[self.walkCount // 3], (self.x, self.y))
                 self.walkCount += 1
-            elif self.bossVel < 0: #왼쪽으로
+            elif self.vel < 0: #왼쪽으로
                 screen.blit(self.walkLeft2[self.walkCount//3],(self.x, self.y)) # //3 -> 나머지 값을 제외 한 몫 
                 self.walkCount += 1
             self.hitbox = (self.x + 13, self.y + 2, 31, 57) #draw hitbox 
             pygame.draw.rect(screen, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10)) #Red is background color
-            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/20)*(20 - self.bossHP)), 10)) #x,y,w,h
+            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/self.maxHP)*(self.maxHP - self.health)), 10)) #x,y,w,h
             #pygame.draw.rect(screen, (255,255,255), self.hitbox, 2) self.move()
 
     def move(self):
@@ -181,22 +181,17 @@ class enemy():
                 self.health = self.health - 1
             else:
                 self.visible = False
-    def bossHit(self):
-        if self.visible:
-            hitSound.play()
-            if self.bossHP > 0:
-                self.bossHP = self.bossHP - 1
-            else:
-                self.visible = False
+  
         
 clock = pygame.time.Clock()
 beginning = 1
 second = 0
 
 man = player(50, 400, 64, 64)#main character
-goblin = enemy(100, 400, 64, 64, 550) #goblin = class를 가진 instance. 
-goblin2 = enemy(120,400,64,64,480)
+goblin = enemy(100, 400, 64, 64, 550, 5, 10, 10) #goblin = class를 가진 instance. 
+goblin2 = enemy(120, 400, 64, 64, 480, 10, 20, 20) # class enemy -> (self, x, y, width, height, end, vel, health, maxHP)
 portal = portal(500, 400, 64, 27)
+
 
 bullets = [] #각각의 총알의 명령문을 저장 => 총알이 몇알이 나가는지를 세어주는 역할
 font = pygame.font.SysFont('cosmicsans', 30, True)
@@ -342,7 +337,7 @@ while second == 1:
         if goblin2.visible:
             if bullet.y - bullet.radius < goblin2.hitbox[1] + goblin2.hitbox[3] and bullet.y + bullet.radius > goblin2.hitbox[1]:
                 if bullet.x + bullet.radius >goblin2.hitbox[0] and bullet.x - bullet.radius < goblin2.hitbox[0] + goblin2.hitbox[2]:
-                    goblin2.bossHit()
+                    goblin2.hit()
                     score = score + 1
                     bullets.pop(bullets.index(bullet))
             if bullet.x < 600 and bullet.x > 0: #벽을 뚫지 않게
