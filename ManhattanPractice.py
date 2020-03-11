@@ -4,6 +4,7 @@ pygame.init()
 walkRight = [pygame.image.load('MainChara_R/R1.png'), pygame.image.load('MainChara_R/R2.png'), pygame.image.load('MainChara_R/R3.png')]#, pygame.image.load('Game/R4.png'), pygame.image.load('Game/R5.png'), pygame.image.load('Game/R6.png'), pygame.image.load('Game/R7.png'), pygame.image.load('Game/R8.png'), pygame.image.load('Game/R9.png')]
 walkLeft = [pygame.image.load('MainChara_R/L1.png'), pygame.image.load('MainChara_R/L2.png'), pygame.image.load('MainChara_R/L3.png')]#, pygame.image.load('Game/L4.png'), pygame.image.load('Game/L5.png'), pygame.image.load('Game/L6.png'), pygame.image.load('Game/L7.png'), pygame.image.load('Game/L8.png'), pygame.image.load('Game/L9.png')]
 bg = pygame.image.load('Game/bg.jpg')
+bg2 = pygame.image.load('Game/bg2.png')
 #dungeon = pygame.image.load('')
 char = pygame.image.load('MainChara_R/standing.png')
 score = 0 # Tuple -> list
@@ -168,6 +169,7 @@ second = 0
 
 man = player(50, 400, 64, 64)#main character
 goblin = enemy(100, 400, 64, 64, 550) #goblin = class를 가진 instance. 
+goblin2 = enemy(120,400,64,64,480)
 portal = portal(500, 400, 64, 27)
 
 bullets = [] #각각의 총알의 명령문을 저장 => 총알이 몇알이 나가는지를 세어주는 역할
@@ -181,6 +183,18 @@ def drawGameWindow(): #캐릭터가 움직일때마다 모션 표현
     portal.draw(screen)
     man.draw(screen)
     goblin.draw(screen)
+    
+    for bullet in bullets:
+        bullet.draw(screen)
+    pygame.display.update()
+
+def drawGameWindow2(): #캐릭터가 움직일때마다 모션 표현
+    screen.blit(bg2,(0,0)) 
+    text = font.render('Score: ' + str(score), 2, (0,0,0)) # font 설정!
+    screen.blit(text, (450, 10))
+    portal.draw(screen)
+    man.draw(screen)
+    goblin2.draw(screen)
     
     for bullet in bullets:
         bullet.draw(screen)
@@ -222,6 +236,7 @@ def jumpDown():
 
 def StageTwo():
     second = 1
+    man = player(50, 400, 64, 64) 
 #def moveMap()
 #    StageTwo()
 ##################################################################
@@ -282,23 +297,23 @@ while beginning == 1:
         jumpDown()
 
     drawGameWindow()
-
+##movemap()을 통해서 여기로 바로 오게 됨
 
 while second == 1:
     clock.tick(27) # 27 frames
-    if goblin.visible:
-        if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
-            if man.hitbox[0] + man.hitbox[2]  >goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
+    if goblin2.visible:
+        if man.hitbox[1] < goblin2.hitbox[1] + goblin2.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin2.hitbox[1]:
+            if man.hitbox[0] + man.hitbox[2]  >goblin2.hitbox[0] and man.hitbox[0] < goblin2.hitbox[0] + goblin2.hitbox[2]:
                 man.hit()
                 score = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
     for bullet in bullets:
-        if goblin.visible:
-            if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
-                if bullet.x + bullet.radius >goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-                    goblin.hit()
+        if goblin2.visible:
+            if bullet.y - bullet.radius < goblin2.hitbox[1] + goblin2.hitbox[3] and bullet.y + bullet.radius > goblin2.hitbox[1]:
+                if bullet.x + bullet.radius >goblin2.hitbox[0] and bullet.x - bullet.radius < goblin2.hitbox[0] + goblin2.hitbox[2]:
+                    goblin2.hit()
                     score = score + 1
                     bullets.pop(bullets.index(bullet))
             if bullet.x < 600 and bullet.x > 0: #벽을 뚫지 않게
@@ -319,9 +334,9 @@ while second == 1:
         second = True
         StageTwo()
     
-    #if pressed[pygame.K_SPACE]:
-    #    bulletSound.play()
-    #    spaceBar()
+    if pressed[pygame.K_SPACE]:
+        bulletSound.play()
+        spaceBar()
 
     if pressed[pygame.K_LEFT] and man.x > man.velocity: 
         leftKey()
@@ -339,6 +354,6 @@ while second == 1:
     else:
         jumpDown()
 
-    drawGameWindow()
+    drawGameWindow2()
 
 pygame.quit()
