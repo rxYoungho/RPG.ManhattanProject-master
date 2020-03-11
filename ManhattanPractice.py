@@ -163,8 +163,8 @@ class enemy():
                 self.visible = False
         
 clock = pygame.time.Clock()
-beginning = True
-#second = False
+beginning = 1
+second = 0
 
 man = player(50, 400, 64, 64)#main character
 goblin = enemy(100, 400, 64, 64, 550) #goblin = class를 가진 instance. 
@@ -219,10 +219,72 @@ def jumpDown():
     else:
         man.jumpCount = 10
         man.isJump = False
+
+def StageTwo():
+    second = 1
 #def moveMap()
 #    StageTwo()
 ##################################################################
-while beginning:
+while beginning == 1:
+    clock.tick(27) # 27 frames
+    if goblin.visible:
+        if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
+            if man.hitbox[0] + man.hitbox[2]  >goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
+                man.hit()
+                score = 0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+    for bullet in bullets:
+        if goblin.visible:
+            if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
+                if bullet.x + bullet.radius >goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+                    goblin.hit()
+                    score = score + 1
+                    bullets.pop(bullets.index(bullet))
+            if bullet.x < 600 and bullet.x > 0: #벽을 뚫지 않게
+                bullet.x += bullet.vel
+            else:
+                bullets.pop(bullets.index(bullet)) #[0 . 3 4 8 9] #501 픽셀로 가버리면 불릿을 없애버리는 코드
+                #현재의 불릿 인덱스*(위치)를 찾아서 지움
+        else:
+            if bullet.x < 600 and bullet.x > 0: #벽을 뚫지 않게
+                bullet.x += bullet.vel
+            else:
+                bullets.pop(bullets.index(bullet))
+
+    pressed = pygame.key.get_pressed()
+    ##작은 칸을 넘어가야함. 50 < x < 66 
+    if pressed[pygame.K_DOWN]:
+        beginning = 0
+        second = 1
+        StageTwo()
+        break
+    
+    if pressed[pygame.K_SPACE]:
+        bulletSound.play()
+        spaceBar()
+
+    if pressed[pygame.K_LEFT] and man.x > man.velocity: 
+        leftKey()
+
+    elif pressed[pygame.K_RIGHT] and man.x < 600 - man.width - 5: 
+        rightKey()
+
+    else: # If jus standing
+        man.standing = True
+        man.walkCount = 0
+
+    if not (man.isJump): 
+        if pressed[pygame.K_UP]:
+            jumpUp() 
+    else:
+        jumpDown()
+
+    drawGameWindow()
+
+
+while second == 1:
     clock.tick(27) # 27 frames
     if goblin.visible:
         if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
@@ -257,9 +319,9 @@ while beginning:
         second = True
         StageTwo()
     
-    if pressed[pygame.K_SPACE]:
-        bulletSound.play()
-        spaceBar()
+    #if pressed[pygame.K_SPACE]:
+    #    bulletSound.play()
+    #    spaceBar()
 
     if pressed[pygame.K_LEFT] and man.x > man.velocity: 
         leftKey()
