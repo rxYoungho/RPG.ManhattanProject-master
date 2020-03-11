@@ -236,7 +236,8 @@ def jumpDown():
 
 def StageTwo():
     second = 1
-    man = player(50, 400, 64, 64) 
+    man.x = 50
+    man.y = 400 
 #def moveMap()
 #    StageTwo()
 ##################################################################
@@ -271,10 +272,12 @@ while beginning == 1:
     pressed = pygame.key.get_pressed()
     ##작은 칸을 넘어가야함. 50 < x < 66 
     if pressed[pygame.K_DOWN]:
-        beginning = 0
-        second = 1
-        StageTwo()
-        break
+        if not goblin.visible:
+            if 490 < man.x < 510:
+                beginning = 0
+                second = 1
+                StageTwo()
+                break
     
     if pressed[pygame.K_SPACE]:
         bulletSound.play()
