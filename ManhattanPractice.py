@@ -188,8 +188,8 @@ beginning = 1
 second = 0
 
 man = player(50, 400, 64, 64)#main character
-goblin = enemy(100, 400, 64, 64, 550, 5, 10, 10) #goblin = class를 가진 instance. 
-goblin2 = enemy(120, 400, 64, 64, 480, 10, 20, 20) # class enemy -> (self, x, y, width, height, end, vel, health, maxHP)
+goblin = enemy(100, 400, 64, 64, 550, 3, 10, 10) #goblin = class를 가진 instance. 
+goblin2 = enemy(80, 400, 64, 64, 480, 3, 20, 20) # class enemy -> (self, x, y, width, height, end, vel, health, maxHP)
 portal = portal(500, 400, 64, 27)
 
 
