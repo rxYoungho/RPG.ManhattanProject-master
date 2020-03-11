@@ -273,7 +273,7 @@ while beginning == 1:
     ##작은 칸을 넘어가야함. 50 < x < 66 
     if pressed[pygame.K_DOWN]:
         if not goblin.visible:
-            if 490 < man.x < 510:
+            if 430 < man.x < 500:
                 beginning = 0
                 second = 1
                 StageTwo()
@@ -333,9 +333,12 @@ while second == 1:
     pressed = pygame.key.get_pressed()
     ##작은 칸을 넘어가야함. 50 < x < 66 
     if pressed[pygame.K_DOWN]:
-        beginning = False
-        second = True
-        StageTwo()
+        if not goblin2.visible:
+            if 430 < man.x < 500:
+                beginning = 0
+                #third = 1
+                StageTwo()
+                break
     
     if pressed[pygame.K_SPACE]:
         bulletSound.play()
