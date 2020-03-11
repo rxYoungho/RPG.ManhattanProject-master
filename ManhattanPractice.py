@@ -11,7 +11,7 @@ score = 0 # Tuple -> list
 
 screen = pygame.display.set_mode((600, 480))
 pygame.display.set_caption("MANhattan game project")
-surface = pygame.image.load('Game/R1.png')
+surface = pygame.image.load('MainChara_R/R1.png')
 pygame.display.set_icon(surface)
 
 bulletSound = pygame.mixer.Sound('SoundEff/bullet.wav')
@@ -91,6 +91,17 @@ class projectile():
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
         #tuple = list랑 비슷하지만 숫자를 변경 할 수 있는 놈
 
+class portal():
+    dungeonPortal = [pygame.image.load('Game/portal.png')]
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+    def draw(self, screen):
+        screen.blit(self.dungeonPortal[0], (self.x, self.y))
+    
+
 class enemy():
     walkRight = [pygame.image.load('Game/R1E.png'), pygame.image.load('Game/R2E.png'), pygame.image.load('Game/R3E.png'), pygame.image.load('Game/R4E.png'), pygame.image.load('Game/R5E.png'), pygame.image.load('Game/R6E.png'), pygame.image.load('Game/R7E.png'), pygame.image.load('Game/R8E.png'), pygame.image.load('Game/R9E.png'), pygame.image.load('Game/R10E.png'), pygame.image.load('Game/R11E.png')]
     walkLeft = [pygame.image.load('Game/L1E.png'), pygame.image.load('Game/L2E.png'), pygame.image.load('Game/L3E.png'), pygame.image.load('Game/L4E.png'), pygame.image.load('Game/L5E.png'), pygame.image.load('Game/L6E.png'), pygame.image.load('Game/L7E.png'), pygame.image.load('Game/L8E.png'), pygame.image.load('Game/L9E.png'), pygame.image.load('Game/L10E.png'), pygame.image.load('Game/L11E.png')]
@@ -151,25 +162,67 @@ class enemy():
             else:
                 self.visible = False
         
-def drawGameWindow(): #캐릭터가 움직일때마다 모션 표현
-    screen.blit(bg,(0,0)) # 내뒤에 있는 사진 지우기용
-    text = font.render('Score: ' + str(score), 2, (0,0,0)) # font 설정!
-    screen.blit(text, (450, 10))
-    man.draw(screen)
-    goblin.draw(screen)
-    for bullet in bullets:
-        bullet.draw(screen)
-    pygame.display.update()
-
 clock = pygame.time.Clock()
-run = True
+beginning = True
+#second = False
+
 man = player(50, 400, 64, 64)#main character
-goblin = enemy(100, 410, 64, 64, 550) #goblin = class를 가진 instance. 
+goblin = enemy(100, 400, 64, 64, 550) #goblin = class를 가진 instance. 
+portal = portal(500, 400, 64, 27)
+
 bullets = [] #각각의 총알의 명령문을 저장 => 총알이 몇알이 나가는지를 세어주는 역할
 font = pygame.font.SysFont('cosmicsans', 30, True)
 #instance
 
-while run:
+def drawGameWindow(): #캐릭터가 움직일때마다 모션 표현
+    screen.blit(bg,(0,0)) 
+    text = font.render('Score: ' + str(score), 2, (0,0,0)) # font 설정!
+    screen.blit(text, (450, 10))
+    portal.draw(screen)
+    man.draw(screen)
+    goblin.draw(screen)
+    
+    for bullet in bullets:
+        bullet.draw(screen)
+    pygame.display.update()
+############################MoveMENT!!!!######################################
+def spaceBar():
+    if man.left:
+        facing = -1
+    else:
+        facing = 1
+    if len(bullets) < 1:
+        bullets.append(projectile(round(man.x + man.width //2), round(man.y + man.height//2), 6, (0,0,0), facing))
+def leftKey():
+    man.x -= man.velocity
+    man.left = True
+    man.right = False # left일때 오른쪽 키를 누르면 절대 안되기 때문
+    man.standing = False
+
+def rightKey():
+    man.x += man.velocity
+    man.right = True
+    man.left= False
+    man.standing = False
+    
+def jumpUp():
+    man.isJump = True
+    man.right = False
+    man.left = False
+    man.standing = False
+    man.walkCount = 0
+
+def jumpDown():
+    if man.jumpCount >= -10:  
+        man.y -= (man.jumpCount * abs(man.jumpCount)) * 0.5
+        man.jumpCount -= 1
+    else:
+        man.jumpCount = 10
+        man.isJump = False
+#def moveMap()
+#    StageTwo()
+##################################################################
+while beginning:
     clock.tick(27) # 27 frames
     if goblin.visible:
         if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
@@ -199,60 +252,30 @@ while run:
 
     pressed = pygame.key.get_pressed()
     ##작은 칸을 넘어가야함. 50 < x < 66 
+    if pressed[pygame.K_DOWN]:
+        beginning = False
+        second = True
+        StageTwo()
+    
     if pressed[pygame.K_SPACE]:
         bulletSound.play()
-        if man.left:
-            facing = -1
-        else:
-            facing = 1
-        if len(bullets) < 1:
-            bullets.append(projectile(round(man.x + man.width //2), round(man.y + man.height//2), 6, (0,0,0), facing))
+        spaceBar()
 
     if pressed[pygame.K_LEFT] and man.x > man.velocity: 
-        man.x -= man.velocity
-        man.left = True
-        man.right = False # left일때 오른쪽 키를 누르면 절대 안되기 때문
-        man.standing = False
-        
+        leftKey()
+
     elif pressed[pygame.K_RIGHT] and man.x < 600 - man.width - 5: 
-        man.x += man.velocity
-        man.right = True
-        man.left= False
-        man.standing = False
-    
+        rightKey()
+
     else: # If jus standing
         man.standing = True
         man.walkCount = 0
 
-    if pressed[pygame.K_w]:
-        man.x = 500
-        man.y = 999
-########## 캐릭터의 점프 ###########
     if not (man.isJump): 
         if pressed[pygame.K_UP]:
-            man.isJump = True
-            man.right = False
-            man.left = False
-            man.standing = False
-            man.walkCount = 0
-
+            jumpUp() 
     else:
-        if man.jumpCount >= -10:  
-            man.y -= (man.jumpCount * abs(man.jumpCount)) * 0.5
-            man.jumpCount -= 1
-        else:
-            man.jumpCount = 10
-            man.isJump = False
-    
-    # movement = random.sample(range(1,2), 1)
-    # if movement == 1:
-    #     x += velocity
-    #     right = True
-    #     left = False
-    # if movement == 2:
-    #     x -= velocity
-    #     right = False
-    #     left = True
+        jumpDown()
 
     drawGameWindow()
 
