@@ -106,6 +106,8 @@ class portal():
 class enemy():
     walkRight = [pygame.image.load('Game/R1E.png'), pygame.image.load('Game/R2E.png'), pygame.image.load('Game/R3E.png'), pygame.image.load('Game/R4E.png'), pygame.image.load('Game/R5E.png'), pygame.image.load('Game/R6E.png'), pygame.image.load('Game/R7E.png'), pygame.image.load('Game/R8E.png'), pygame.image.load('Game/R9E.png'), pygame.image.load('Game/R10E.png'), pygame.image.load('Game/R11E.png')]
     walkLeft = [pygame.image.load('Game/L1E.png'), pygame.image.load('Game/L2E.png'), pygame.image.load('Game/L3E.png'), pygame.image.load('Game/L4E.png'), pygame.image.load('Game/L5E.png'), pygame.image.load('Game/L6E.png'), pygame.image.load('Game/L7E.png'), pygame.image.load('Game/L8E.png'), pygame.image.load('Game/L9E.png'), pygame.image.load('Game/L10E.png'), pygame.image.load('Game/L11E.png')]
+    walkRight2 = [pygame.image.load('Game/R1.png'), pygame.image.load('Game/R2.png'), pygame.image.load('Game/R3.png'), pygame.image.load('Game/R4.png'), pygame.image.load('Game/R5.png'), pygame.image.load('Game/R6.png'), pygame.image.load('Game/R7.png'), pygame.image.load('Game/R8.png'), pygame.image.load('Game/R9.png') ]
+    walkLeft2 = [pygame.image.load('Game/L1.png'), pygame.image.load('Game/L2.png'), pygame.image.load('Game/L3.png'), pygame.image.load('Game/L4.png'), pygame.image.load('Game/L5.png'), pygame.image.load('Game/L6.png'), pygame.image.load('Game/L7.png'), pygame.image.load('Game/L8.png'), pygame.image.load('Game/L9.png')]
 
     def __init__(self, x, y, width, height, end):
         self.visible = True
@@ -117,11 +119,13 @@ class enemy():
             self.end = end
             self.walkCount = 0
             self.vel = 3
+            self.bossVel = 6
             self.path = [self.x, self.end] # path = x -----> END 
             self.hitbox = (self.x + 13, self.y + 2, 31, 57)
             self.score = 0
             self.health = 10 #Remove health bar and enemy when the it is dead
-
+            self.bossHP = 20
+            
     def draw(self, screen):
         self.move()
         if self.visible:
@@ -135,7 +139,23 @@ class enemy():
                 self.walkCount += 1
             self.hitbox = (self.x + 13, self.y + 2, 31, 57) #draw hitbox 
             pygame.draw.rect(screen, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10)) #Red is background color
-            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((5)*(10 - self.health)), 10))
+            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/10)*(10 - self.health)), 10))
+            #pygame.draw.rect(screen, (255,255,255), self.hitbox, 2) self.move()
+    
+    def draw2(self, screen):
+        self.move()
+        if self.visible:
+            if self.walkCount + 1 >= 27: #33프레임이 넘어가면  -> 사진이 끝까지 왔다는 뜻 
+                self.walkCount = 0
+            if self.bossVel > 0: #오른쪽으로 갈때,
+                screen.blit(self.walkRight2[self.walkCount // 3], (self.x, self.y))
+                self.walkCount += 1
+            elif self.bossVel < 0: #왼쪽으로
+                screen.blit(self.walkLeft2[self.walkCount//3],(self.x, self.y)) # //3 -> 나머지 값을 제외 한 몫 
+                self.walkCount += 1
+            self.hitbox = (self.x + 13, self.y + 2, 31, 57) #draw hitbox 
+            pygame.draw.rect(screen, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10)) #Red is background color
+            pygame.draw.rect(screen, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((50/20)*(20 - self.bossHP)), 10)) #x,y,w,h
             #pygame.draw.rect(screen, (255,255,255), self.hitbox, 2) self.move()
 
     def move(self):
@@ -158,8 +178,14 @@ class enemy():
         if self.visible:
             hitSound.play()
             if self.health > 0:
-                
                 self.health = self.health - 1
+            else:
+                self.visible = False
+    def bossHit(self):
+        if self.visible:
+            hitSound.play()
+            if self.bossHP > 0:
+                self.bossHP = self.bossHP - 1
             else:
                 self.visible = False
         
@@ -194,7 +220,7 @@ def drawGameWindow2(): #캐릭터가 움직일때마다 모션 표현
     screen.blit(text, (450, 10))
     portal.draw(screen)
     man.draw(screen)
-    goblin2.draw(screen)
+    goblin2.draw2(screen)
     
     for bullet in bullets:
         bullet.draw(screen)
@@ -273,7 +299,7 @@ while beginning == 1:
     ##작은 칸을 넘어가야함. 50 < x < 66 
     if pressed[pygame.K_DOWN]:
         if not goblin.visible:
-            if 430 < man.x < 500:
+            if 450 < man.x < 500:
                 beginning = 0
                 second = 1
                 StageTwo()
@@ -316,7 +342,7 @@ while second == 1:
         if goblin2.visible:
             if bullet.y - bullet.radius < goblin2.hitbox[1] + goblin2.hitbox[3] and bullet.y + bullet.radius > goblin2.hitbox[1]:
                 if bullet.x + bullet.radius >goblin2.hitbox[0] and bullet.x - bullet.radius < goblin2.hitbox[0] + goblin2.hitbox[2]:
-                    goblin2.hit()
+                    goblin2.bossHit()
                     score = score + 1
                     bullets.pop(bullets.index(bullet))
             if bullet.x < 600 and bullet.x > 0: #벽을 뚫지 않게
@@ -334,7 +360,7 @@ while second == 1:
     ##작은 칸을 넘어가야함. 50 < x < 66 
     if pressed[pygame.K_DOWN]:
         if not goblin2.visible:
-            if 430 < man.x < 500:
+            if 450 < man.x < 500:
                 beginning = 0
                 #third = 1
                 StageTwo()
