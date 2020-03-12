@@ -12,8 +12,8 @@ score = 0 # Tuple -> list
 
 screen = pygame.display.set_mode((600, 480))
 pygame.display.set_caption("MANhattan game project")
-surface = pygame.image.load('MainChara_R/R1.png')
-pygame.display.set_icon(surface)
+icon = pygame.image.load('MainChara_R/R1.png')
+pygame.display.set_icon(icon)
 
 bulletSound = pygame.mixer.Sound('SoundEff/bullet.wav')
 hitSound = pygame.mixer.Sound('SoundEff/hit.wav')
@@ -101,6 +101,7 @@ class portal():
         self.height = height
     def draw(self, screen):
         screen.blit(self.dungeonPortal[0], (self.x, self.y))
+    
     
 
 class enemy():
@@ -191,6 +192,7 @@ man = player(50, 400, 64, 64)#main character
 goblin = enemy(100, 400, 64, 64, 550, 3, 10, 10) #goblin = class를 가진 instance. 
 goblin2 = enemy(80, 400, 64, 64, 480, 3, 20, 20) # class enemy -> (self, x, y, width, height, end, vel, health, maxHP)
 portal = portal(500, 400, 64, 27)
+portal2 = portal(500, 400, 64, 27)
 
 
 bullets = [] #각각의 총알의 명령문을 저장 => 총알이 몇알이 나가는지를 세어주는 역할
@@ -213,7 +215,7 @@ def drawGameWindow2(): #캐릭터가 움직일때마다 모션 표현
     screen.blit(bg2,(0,0)) 
     text = font.render('Score: ' + str(score), 2, (0,0,0)) # font 설정!
     screen.blit(text, (450, 10))
-    portal.draw(screen)
+    portal2.draw(screen)
     man.draw(screen)
     goblin2.draw2(screen)
     
